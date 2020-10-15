@@ -10,10 +10,23 @@ def main_content() -> str:
 
     if param_str == "":
         return """
+            <script language="javascript">
+                function check() {
+                    var param = document.form1.param1.value;
+                    if(param == '') {
+                        alert("値を入力してください。");
+                        return false;
+                    } else if(param.match( /[^0-9]+/ )) {
+                        alert("数字のみを入力してください。");
+                        return false;
+                    }
+                    return confirm('実行しても良いですか?');
+                }
+            </script>
             <form name="form1" action="#" method="post">
                 文字を入力して下さい
                 <input type="text" name="param1" />
-                <button type="submit" name="submit">送信</button>
+                <button type="submit" name="submit" onclick="return check()">送信</button>
             </form>
             """
     else:
