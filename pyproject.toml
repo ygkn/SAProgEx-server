@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "SAProgEx-server"
+version = "0.1.0"
+description = "システムアーキテクトプログラミング演習のサーバサイドプログラム"
+authors = ["ygkn <2000ygkn0713@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+mypy = "^0.790"
+black = "^20.8b1"
+flake8 = "^3.8.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
