@@ -5,9 +5,9 @@ from librarian.db import get_db
 bp = Blueprint("book", __name__)
 
 
-@bp.route("/")
-def index():
-    """Show all the posts, most recent first."""
+@bp.route("/search")
+def search():
+    """search"""
 
     db = get_db()
     query = request.args.get("query")
