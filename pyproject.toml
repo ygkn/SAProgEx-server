@@ -6,6 +6,7 @@ authors = ["ygkn <2000ygkn0713@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+Flask = "^1.1.2"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.790"
