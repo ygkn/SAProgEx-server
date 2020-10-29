@@ -30,9 +30,9 @@ def create_app(test_config=None) -> Flask:
     db.init_app(app)
 
     # apply the blueprints to the app
-    from librarian import book
+    from librarian import books
 
-    app.register_blueprint(book.bp, url_prefix="/book")
+    app.register_blueprint(books.bp, url_prefix="/books")
 
     # make url_for('index') == url_for('blog.index')
     # in another app, you might define a separate main index here with
