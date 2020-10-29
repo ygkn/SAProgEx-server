@@ -5,7 +5,7 @@ from librarian.db import get_db
 bp = Blueprint("book", __name__)
 
 
-@bp.route("/search")
+@bp.route("/")
 def search():
     """search"""
 
