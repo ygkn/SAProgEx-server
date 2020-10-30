@@ -44,18 +44,18 @@ def search():
                 from
                     BOOKLIST
                 where
-                    ID > ?
-                    and (
+                    (
                         TITLE like ?
                         or AUTHOR like ?
                         or PUBLISHER like ?
                     )
+                    and ID > ?
                 order by ID asc
                 limit ? + 1
                 """,
-            (
+            like_params
+            + (
                 after,
-                *like_params,
                 count,
             ),
         ).fetchall()
