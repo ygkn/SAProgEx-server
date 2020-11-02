@@ -95,10 +95,9 @@ def suggestions():
     """suggestions"""
 
     db = get_db()
-    query = request.args.get("query")
+    query = request.args.get("query", default="")
 
-    if query is None:
-
+    if query == "":
         return jsonify([])
 
     books = db.execute(
