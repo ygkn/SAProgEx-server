@@ -25,6 +25,11 @@ def create_app(test_config=None) -> Flask:
     def hello():
         return "Hello, World!"
 
+    @app.after_request
+    def add_header(res):
+        res.headers["Access-Control-Allow-Origin"] = "*"
+        return res
+
     from librarian import db
 
     db.init_app(app)
