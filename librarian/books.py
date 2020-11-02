@@ -86,7 +86,7 @@ def search():
     ]
 
     return jsonify(
-        {"items": items, "total": total, "hasMany": len(books_with_next) > count}
+        {"items": items, "total": total, "hasMore": len(books_with_next) > count}
     )
 
 
