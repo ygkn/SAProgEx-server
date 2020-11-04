@@ -9,69 +9,93 @@ bp = Blueprint("book", __name__)
 def search():
     """search"""
 
-    query = request.args.get("query")
-    after = request.args.get("after", default=0, type=int)
+    query = request.args.get("query", default="")
+    after = request.args.get("after")
     count = request.args.get("count", default=50, type=int)
+    sort_field = request.args.get("sort-field", default="ID")
+    sort_direction = request.args.get("sort-direction", default="asc")
+
+    parameter_error = []
+
+    if not (1 <= count and count <= 50):
+        parameter_error.append("invalid parameter: `count` must be between 1 and 50")
+
+    if sort_direction not in ("asc", "desc"):
+        parameter_error.append(
+            "invalid parameter: `sort-direction` must be `asc` or `desc`"
+        )
+
+    if sort_field not in (
+        "ID",
+        "AUTHOR",
+        "TITLE",
+        "PUBLISHER",
+        "PRICE",
+        "ISBN",
+    ):
+        parameter_error.append(
+            "invalid parameter: `sort-field` must be"
+            "`ID` or `AUTHOR` or `TITLE` or `PUBLISHER` or `PRICE` or `ISBN`"
+        )
+
+    if len(parameter_error) != 0:
+        return jsonify({"message": "\n".join(parameter_error)}), 400
 
     db = get_db()
 
     books_with_next = []
     total = 0
 
-    if query is None:
-        books_with_next = db.execute(
-            """
-                select
-                    *
-                from
-                    BOOKLIST
-                where
-                    ID > ?
-                order by ID asc
-                limit ? + 1
-            """,
-            (after, count),
-        ).fetchall()
-
-        total = db.execute("select count(*) from BOOKLIST").fetchone()["count(*)"]
-    else:
-        like_params = (f"%{query}%",) * 3
-
-        books_with_next = db.execute(
-            """
-                select
-                    *
-                from
-                    BOOKLIST
-                where
+    books_with_next = db.execute(
+        f"""
+            select
+                *
+            from
+                BOOKLIST
+            where
+                (
+                    :query == "" or
                     (
-                        TITLE like ?
-                        or AUTHOR like ?
-                        or PUBLISHER like ?
+                        TITLE like :query
+                        or AUTHOR like :query
+                        or PUBLISHER like :query
                     )
-                    and ID > ?
-                order by ID asc
-                limit ? + 1
-                """,
-            like_params
-            + (
-                after,
-                count,
-            ),
-        ).fetchall()
+                )
+                and (
+                    :after is NULL or
+                    {sort_field} {'>' if sort_direction == 'asc' else '<'} (
+                    select
+                        {sort_field}
+                    from
+                        BOOKLIST
+                    where
+                        ID=:after
+                    )
+                )
+            order by {sort_field} {sort_direction}
+            limit :count + 1
+            """,
+        {"query": query, "after": after, "count": count},
+    ).fetchall()
 
-        total = db.execute(
-            """
-                select
-                    count(*)
-                from
-                    BOOKLIST
-                where
-                    TITLE like ?
-                    or AUTHOR like ?
-                    or PUBLISHER like ?""",
-            like_params,
-        ).fetchone()["count(*)"]
+    total = db.execute(
+        """
+            select
+                count(*)
+            from
+                BOOKLIST
+            where
+                (
+                    :query == "" or
+                    (
+                        TITLE like :query
+                        or AUTHOR like :query
+                        or PUBLISHER like :query
+                    )
+                )
+        """,
+        {"query": query},
+    ).fetchone()["count(*)"]
 
     items = [
         dict(
