@@ -75,7 +75,7 @@ def search():
             order by {sort_field} {sort_direction}
             limit :count + 1
             """,
-        {"query": query, "after": after, "count": count},
+        {"query": f"%{query}%" if query != "" else "", "after": after, "count": count},
     ).fetchall()
 
     total = db.execute(
@@ -94,7 +94,7 @@ def search():
                     )
                 )
         """,
-        {"query": query},
+        {"query": f"%{query}%" if query != "" else ""},
     ).fetchone()["count(*)"]
 
     items = [
