@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from librarian.db import get_db
+from app.db import get_db
 
 bp = Blueprint("book", __name__)
 

@@ -8,7 +8,7 @@ def create_app(test_config=None) -> Flask:
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY="dev",
-        DATABASE=os.path.join(app.instance_path, "librarian.sqlite3"),
+        DATABASE=os.path.join(app.instance_path, "db.sqlite3"),
     )
 
     if test_config is None:
@@ -30,12 +30,12 @@ def create_app(test_config=None) -> Flask:
         res.headers["Access-Control-Allow-Origin"] = "*"
         return res
 
-    from librarian import db
+    from app import db
 
     db.init_app(app)
 
     # apply the blueprints to the app
-    from librarian import books
+    from app import books
 
     app.register_blueprint(books.bp, url_prefix="/books")
 

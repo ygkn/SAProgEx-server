@@ -21,10 +21,16 @@ Then, install dependencies with Poetry.
 poetry install
 ```
 
+Initiate database.
+
+```sh
+poetry run flask init-db
+```
+
 ### Run
 
 Run in development mode:
 
 ```sh
-FLASK_APP=librarian poetry run flask run --debugger --reload
+poetry run flask run --debugger --reload
 ```
