@@ -20,7 +20,7 @@ def get_db() -> sqlite3.Connection:
     return g.db
 
 
-def close_db(e=None):
+def close_db(e=None) -> None:
     """If this request connected to the database, close the
     connection.
     """
