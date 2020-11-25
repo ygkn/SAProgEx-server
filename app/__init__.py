@@ -21,10 +21,6 @@ def create_app(test_config=None) -> Flask:
     except OSError:
         pass
 
-    @app.route("/hello")
-    def hello():
-        return "Hello, World!"
-
     @app.after_request
     def add_header(res):
         res.headers["Access-Control-Allow-Origin"] = "*"
