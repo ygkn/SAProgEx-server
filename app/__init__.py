@@ -26,6 +26,10 @@ def create_app(test_config=None) -> Flask:
         res.headers["Access-Control-Allow-Origin"] = "*"
         return res
 
+    @app.route("/")
+    def hello():
+        return "Hi! How is it going?"
+
     from app import db
 
     db.init_app(app)
