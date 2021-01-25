@@ -6,5 +6,5 @@ create table BOOKLIST(
     TITLE varchar(512),
     PUBLISHER varchar(256),
     PRICE int,
-    ISBN char(10)
+    ISBN char(13)
 )
