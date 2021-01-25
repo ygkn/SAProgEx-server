@@ -12,7 +12,7 @@ def search():
     query = request.args.get("query", default="")
     after = request.args.get("after")
     count = request.args.get("count", default=50, type=int)
-    sort_field = request.args.get("sort-field", default="ID")
+    sort_field = request.args.get("sort-field", default="id")
     sort_direction = request.args.get("sort-direction", default="asc")
 
     parameter_error = []
@@ -58,9 +58,9 @@ def search():
                 (
                     %(query)s is NULL or
                     (
-                        TITLE like %(query)s
-                        or AUTHOR like %(query)s
-                        or PUBLISHER like %(query)s
+                        LOWER(TITLE) like LOWER(%(query)s)
+                        or LOWER(AUTHOR) like LOWER(%(query)s)
+                        or LOWER(PUBLISHER) like LOWER(%(query)s)
                     )
                 )
                 and (
@@ -96,9 +96,9 @@ def search():
                 (
                     %(query)s is NULL or
                     (
-                        TITLE like %(query)s
-                        or AUTHOR like %(query)s
-                        or PUBLISHER like %(query)s
+                        LOWER(TITLE) like LOWER(%(query)s)
+                        or LOWER(AUTHOR) like LOWER(%(query)s)
+                        or LOWER(PUBLISHER) like LOWER(%(query)s)
                     )
                 )
         """,
@@ -127,13 +127,14 @@ def suggestions():
 
     cur.execute(
         """
-            select TITLE from BOOKLIST where TITLE like %(query)s
-            union select AUTHOR from BOOKLIST where AUTHOR like %(query)s
-            union select PUBLISHER from BOOKLIST where PUBLISHER like %(query)s
+            select TITLE from BOOKLIST where LOWER(TITLE) like LOWER(%(query)s)
+            union
+                select AUTHOR from BOOKLIST where LOWER(AUTHOR) like LOWER(%(query)s)
+            union
+                select PUBLISHER from BOOKLIST where LOWER(PUBLISHER) like LOWER(%(query)s)
             order by 1 limit 10
         """,
         {"query": f"{query}%"},
     )
-    books = cur
-    print(list(cur))
+    books = list(cur)
     return jsonify([book["title"] for book in books])
