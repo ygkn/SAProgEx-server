@@ -43,10 +43,12 @@ def search():
 
     db = get_db()
 
+    cur = db.cursor()
+
     books_with_next = []
     total = 0
 
-    books_with_next = db.execute(
+    cur.execute(
         f"""
             select
                 *
@@ -54,31 +56,37 @@ def search():
                 BOOKLIST
             where
                 (
-                    :query == "" or
+                    %(query)s is NULL or
                     (
-                        TITLE like :query
-                        or AUTHOR like :query
-                        or PUBLISHER like :query
+                        TITLE like %(query)s
+                        or AUTHOR like %(query)s
+                        or PUBLISHER like %(query)s
                     )
                 )
                 and (
-                    :after is NULL or
+                    %(after)s is NULL or
                     {sort_field} {'>' if sort_direction == 'asc' else '<'} (
                     select
                         {sort_field}
                     from
                         BOOKLIST
                     where
-                        ID=:after
+                        ID=%(after)s
                     )
                 )
             order by {sort_field} {sort_direction}
-            limit :count + 1
+            limit %(count)s + 1
             """,
-        {"query": f"%{query}%" if query != "" else "", "after": after, "count": count},
-    ).fetchall()
+        {
+            "query": f"%{query}%" if query != "" else None,
+            "after": after,
+            "count": count,
+        },
+    )
 
-    total = db.execute(
+    books_with_next = list(cur)
+
+    cur.execute(
         """
             select
                 count(*)
@@ -86,28 +94,19 @@ def search():
                 BOOKLIST
             where
                 (
-                    :query == "" or
+                    %(query)s is NULL or
                     (
-                        TITLE like :query
-                        or AUTHOR like :query
-                        or PUBLISHER like :query
+                        TITLE like %(query)s
+                        or AUTHOR like %(query)s
+                        or PUBLISHER like %(query)s
                     )
                 )
         """,
-        {"query": f"%{query}%" if query != "" else ""},
-    ).fetchone()["count(*)"]
+        {"query": f"%{query}%" if query != "" else None},
+    )
+    total = cur.fetchone()["count"]
 
-    items = [
-        dict(
-            ID=book["ID"],
-            AUTHOR=book["AUTHOR"],
-            TITLE=book["TITLE"],
-            PUBLISHER=book["PUBLISHER"],
-            PRICE=book["PRICE"],
-            ISBN=book["ISBN"],
-        )
-        for book in books_with_next[0:count]
-    ]
+    items = books_with_next[:count]
 
     return jsonify(
         {"items": items, "total": total, "hasMore": len(books_with_next) > count}
@@ -119,12 +118,14 @@ def suggestions():
     """suggestions"""
 
     db = get_db()
+    cur = db.cursor()
+
     query = request.args.get("query", default="")
 
     if query == "":
         return jsonify([])
 
-    books = db.execute(
+    cur.execute(
         """
             select TITLE from BOOKLIST where TITLE like ?
             union select AUTHOR from BOOKLIST where AUTHOR like ?
@@ -132,5 +133,6 @@ def suggestions():
             order by 1 limit 10
         """,
         (f"{query}%",) * 3,
-    ).fetchall()
+    )
+    books = list(cur)
     return jsonify([book["TITLE"] for book in books])

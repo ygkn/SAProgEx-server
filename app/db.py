@@ -1,4 +1,6 @@
-import sqlite3
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
 import csv
 
 import click
@@ -6,16 +8,17 @@ from flask import current_app, g, Flask
 from flask.cli import with_appcontext
 
 
-def get_db() -> sqlite3.Connection:
+def get_db():
     """Connect to the application's configured database. The connection
     is unique for each request and will be reused if this is called
     again.
     """
     if "db" not in g:
-        g.db = sqlite3.connect(
-            current_app.config["DATABASE"], detect_types=sqlite3.PARSE_DECLTYPES
+        g.db = psycopg2.connect(
+            current_app.config["DATABASE"],
         )
-        g.db.row_factory = sqlite3.Row
+
+    g.db.cursor_factory = RealDictCursor
 
     return g.db
 
@@ -34,19 +37,23 @@ def init_db():
     """Clear existing data and create new tables."""
     try:
         db = get_db()
+        cur = db.cursor()
 
         with current_app.open_resource("../schema.sql") as f:
-            db.executescript(f.read().decode("utf8"))
+            cur.execute(f.read().decode("utf8"))
 
         with current_app.open_resource("../BookList.csv", "r") as file:
             reader = csv.reader(file)
             for line in reader:
                 print(list(line))
-                db.execute("insert into BOOKLIST values (?,?,?,?,?,?);", line)
+                cur.execute(
+                    "insert into BOOKLIST values (%s,%s,%s,%s,%s,%s);",
+                    [c if c != "" else None for c in line],
+                )
 
         db.commit()
 
-    except sqlite3.Error as e:
+    except psycopg2.Error as e:
         print("Error occurred:", e.args[0])
 
 
