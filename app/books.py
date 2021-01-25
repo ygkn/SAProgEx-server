@@ -127,9 +127,9 @@ def suggestions():
 
     cur.execute(
         """
-            select TITLE from BOOKLIST where TITLE like ?
-            union select AUTHOR from BOOKLIST where AUTHOR like ?
-            union select PUBLISHER from BOOKLIST where PUBLISHER like ?
+            select TITLE from BOOKLIST where TITLE like %s
+            union select AUTHOR from BOOKLIST where AUTHOR like %s
+            union select PUBLISHER from BOOKLIST where PUBLISHER like %s
             order by 1 limit 10
         """,
         (f"{query}%",) * 3,
