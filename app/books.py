@@ -26,12 +26,12 @@ def search():
         )
 
     if sort_field not in (
-        "ID",
-        "AUTHOR",
-        "TITLE",
-        "PUBLISHER",
-        "PRICE",
-        "ISBN",
+        "id",
+        "author",
+        "title",
+        "publisher",
+        "price",
+        "isbn",
     ):
         parameter_error.append(
             "invalid parameter: `sort-field` must be"
@@ -127,12 +127,13 @@ def suggestions():
 
     cur.execute(
         """
-            select TITLE from BOOKLIST where TITLE like %s
-            union select AUTHOR from BOOKLIST where AUTHOR like %s
-            union select PUBLISHER from BOOKLIST where PUBLISHER like %s
+            select TITLE from BOOKLIST where TITLE like %(query)s
+            union select AUTHOR from BOOKLIST where AUTHOR like %(query)s
+            union select PUBLISHER from BOOKLIST where PUBLISHER like %(query)s
             order by 1 limit 10
         """,
-        (f"{query}%",) * 3,
+        {"query": f"{query}%"},
     )
-    books = list(cur)
-    return jsonify([book["TITLE"] for book in books])
+    books = cur
+    print(list(cur))
+    return jsonify([book["title"] for book in books])
